@@ -1,0 +1,83 @@
+<body>
+</body>
+
+<script>
+    function point(x,y){
+		var p=document.createElement('div');
+		p.style.position='absolute';
+		p.style.height='1px';
+		p.style.width='1px';
+		p.style.backgroundColor='gray';
+		p.style.left=x+'px';
+		p.style.top=y+'px';
+		document.body.appendChild(p);
+		return p;
+	}
+
+
+	for(var i=0;i<=200;i+=10){
+		for(var j=0;j<=200;j+=10){
+			point(i,j);
+		}	
+	}
+	
+	function dot(a,b){
+		return a.x*b.x+a.y*b.y+a.z*b.z;
+	}
+
+	function cross(a,b){
+		var c={x:0,y:0,z:0};
+		c.x=a.y*b.z-a.z*b.y;
+		c.y=a.z*b.x-a.x*b.z;
+		c.z=a.x*b.y-a.y*b.x;
+		return c;
+	}
+
+	function add(a,b){
+		var c={x:0,y:0,z:0};
+		c.x=a.x+b.x;
+		c.y=a.y+b.y;
+		c.z=a.z+b.z;
+		return c;
+	}
+
+	function sub(a,b){
+		var c={x:0,y:0,z:0};
+		c.x=a.x-b.x;
+		c.y=a.y-b.y;
+		c.z=a.z-b.z;
+		return c;
+	}
+
+	function triangle(a,b,c){
+		var minx=a.x<b.x?a.x:b.x;
+		minx=minx<c.x?minx:c.x;
+		var miny=a.y<b.y?a.y:b.y;
+		miny=miny<c.y?miny:c.y;
+		var maxx=a.x>b.x?a.x:b.x;
+		maxx=maxx>c.x?maxx:c.x;
+		var maxy=a.y>b.y?a.y:b.y;
+		maxy=maxy>c.y?maxy:c.y;
+		var AB=sub(b,a);
+		var AC=sub(c,a);
+		for(var i=minx;i<maxx;i++){
+			for(var j=miny;j<maxy;j++){
+				var p={x:0,y:0,z:0};
+				p.x=i;p.y=j;var AP=sub(p,a);
+				var u=(dot(AP,AC)*dot(AB,AB)-dot(AP,AB)*dot(AC,AB))/(dot(AC,AC)*dot(AB,AB)-dot(AC,AB)*dot(AC,AB));
+				var v=(dot(AP,AB)*dot(AC,AC)-dot(AP,AC)*dot(AB,AC))/(dot(AC,AC)*dot(AB,AB)-dot(AC,AB)*dot(AC,AB));
+				if(u>=0&&v>=0&&u+v<=1){	point(i,j);}
+			}
+		}
+
+	}
+
+	var a={x:0,y:0,z:0};
+	var b={x:200,y:100,z:0};
+	var c={x:0,y:200,z:0};
+
+	triangle(a,b,c);
+
+</script>
+
+
