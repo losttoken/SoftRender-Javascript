@@ -72,11 +72,113 @@
 
 	}
 
-	var a={x:0,y:0,z:0};
+/*	var a={x:0,y:0,z:0};
 	var b={x:200,y:100,z:0};
 	var c={x:0,y:200,z:0};
 
-	triangle(a,b,c);
+	triangle(a,b,c);*/
+
+	var cube=[
+		{x:20,y:20,z:20},
+		{x:-20,y:20,z:20},
+		{x:20,y:-20,z:20},
+		{x:20,y:20,z:-20},
+		{x:-20,y:-20,z:20},
+		{x:20,y:-20,z:-20},
+		{x:-20,y:20,z:-20},
+		{x:-20,y:-20,z:-20}
+		];
+
+
+
+
+	function MxV(m,v){
+		v.w=1;
+		var p={x:0,y:0,z:0,w:0};
+		p.x=v.x*m[0]+v.y*m[1]+v.z*m[2]+v.w*m[3];
+		p.y=v.x*m[4]+v.y*m[5]+v.z*m[6]+v.w*m[7];
+		p.z=v.x*m[8]+v.y*m[9]+v.z*m[10]+v.w*m[11];
+		p.w=v.x*m[12]+v.y*m[13]+v.z*m[14]+v.w*m[15];
+		return p;
+	}
+
+	var cube_M=new Array(16);
+	cube_M=[
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1
+			];
+	var cube_V=new Array();
+	var cude_P=new Array();
+
+	console.log(cube_M);
+	
+	var cube_Rot=[
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1
+			];
+	function setRotateZ(m,rot){
+		m[0]=Math.cos(rot);
+		m[1]=-Math.sin(rot);
+		m[4]=Math.sin(rot);
+		m[5]=Math.cos(rot);
+
+		return m;
+	}
+
+
+	console.log(cube_Rot);
+	cube_Rot=setRotateZ(cube_Rot,Math.PI/2);
+	for(var i=0;i<cube.length;i++){ 
+		cube[i]=MxV(cube_Rot,cube[i]);
+	}
+	console.log(cube_Rot);
+	console.log(cube);
+
+
+	function setPosition(m,pos){
+		m[3]=pos.x;
+		m[7]=pos.y;
+		m[11]=pos.z;
+		return m;
+	}
+
+	cube_M=setPosition(cube_M,{x:0,y:0,z:-200});
+
+	function setScale(m,sc){
+		m[0]=sc.x;
+		m[5]=sc.y;
+		m[10]=sc.z;
+		return m;
+	}
+
+	cube_M=setScale(cube_M,{x:0.5,y:1.0,z:0.5});
+
+	console.log(cube_M);
+
+
+	for(var i=0;i<cube.length;i++){ 
+		cube[i]=MxV(cube_M,cube[i]);
+	}
+	
+	console.log(cube);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </script>
 
