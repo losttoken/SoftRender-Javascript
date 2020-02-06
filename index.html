@@ -2,24 +2,63 @@
 </body>
 
 <script>
-    function point(x,y){
+/*    function point(x,y){
 		var p=document.createElement('div');
 		p.style.position='absolute';
 		p.style.height='1px';
 		p.style.width='1px';
-		p.style.backgroundColor='gray';
+		p.style.backgroundColor='red';
 		p.style.left=x+'px';
 		p.style.top=y+'px';
 		document.body.appendChild(p);
 		return p;
+	}*/
+
+	var depthBuffer=new Array(500000);
+	for(var i=0;i<500000;i++){
+		depthBuffer[i]=-100000000;
 	}
 
+	function point5(x,y,z,color){
+		var p=document.createElement('div');
+		p.style.position='absolute';
+		p.style.height='5px';
+		p.style.width='5px';
+		p.style.backgroundColor=color;
+		p.style.left=x+'px';
+		p.style.top=445-y+'px';
+		document.body.appendChild(p);
+
+		return p;
+	}
+
+
+	function point(x,y,z,color){
+
+
+
+		if(depthBuffer[y*800+x]!=null&&z>depthBuffer[y*800+x]){
+			//console.log(z,depthBuffer[y*800+x]);
+			return;
+		}
+		var p=document.createElement('div');
+		p.style.position='absolute';
+		p.style.height='1px';
+		p.style.width='1px';
+		p.style.backgroundColor=color;
+		p.style.left=x+'px';
+		p.style.top=445-y+'px';
+		document.body.appendChild(p);
+		depthBuffer[y*800+x]=z;
+		return p;
+	}
+/*
 
 	for(var i=0;i<=200;i+=10){
 		for(var j=0;j<=200;j+=10){
 			point(i,j);
 		}	
-	}
+	}*/
 	
 	function normalize(a){
 		var x=a.x;
@@ -67,7 +106,7 @@
 		return c;
 	}
 
-	function triangle(a,b,c){
+	function triangle(a,b,c,color){
 		var minx=a.x<b.x?a.x:b.x;
 		minx=minx<c.x?minx:c.x;
 		var miny=a.y<b.y?a.y:b.y;
@@ -77,14 +116,19 @@
 		var maxy=a.y>b.y?a.y:b.y;
 		maxy=maxy>c.y?maxy:c.y;
 		var AB=sub(b,a);
+		AB.z=0;
 		var AC=sub(c,a);
-		for(var i=minx;i<maxx;i++){
-			for(var j=miny;j<maxy;j++){
+		AC.z=0;
+		for(var i=minx;i<maxx;i+=1){
+			for(var j=miny;j<maxy;j+=1){
 				var p={x:0,y:0,z:0};
 				p.x=i;p.y=j;var AP=sub(p,a);
 				var u=(dot(AP,AC)*dot(AB,AB)-dot(AP,AB)*dot(AC,AB))/(dot(AC,AC)*dot(AB,AB)-dot(AC,AB)*dot(AC,AB));
 				var v=(dot(AP,AB)*dot(AC,AC)-dot(AP,AC)*dot(AB,AC))/(dot(AC,AC)*dot(AB,AB)-dot(AC,AB)*dot(AC,AB));
-				if(u>=0&&v>=0&&u+v<=1){	point(i,j);}
+				//console.log(a.z+u*AB.z+v*AC.z);
+					var ab=sub(b,a);
+					var ac=sub(c,a);
+				if(u>=0&&v>=0&&u+v<=1){	point(i,j,(a.z+u*ab.z+v*ac.z),color);}
 			}
 		}
 
@@ -94,7 +138,7 @@
 	var b={x:200,y:100,z:0};
 	var c={x:0,y:200,z:0};
 
-	triangle(a,b,c);*/
+	triangle(a,b,c,'red');*/
 
 	var cube=[
 		{x:20,y:20,z:20},
@@ -102,6 +146,22 @@
 		{x:20,y:-20,z:20},
 		{x:20,y:20,z:-20},
 		{x:-20,y:-20,z:20},
+		{x:20,y:-20,z:-20},
+		{x:-20,y:20,z:-20},
+		{x:-20,y:-20,z:-20}
+		];
+
+
+
+
+
+	var temp=[
+		{x:20,y:20,z:20},
+		{x:-20,y:20,z:20},
+		{x:20,y:-20,z:20},
+		{x:-20,y:-20,z:20},
+
+		{x:20,y:20,z:-20},
 		{x:20,y:-20,z:-20},
 		{x:-20,y:20,z:-20},
 		{x:-20,y:-20,z:-20}
@@ -128,7 +188,7 @@
 			0,0,0,1
 			];
 
-	var cude_P=new Array();
+	
 
 	console.log(cube_M);
 	
@@ -164,7 +224,7 @@
 		return m;
 	}
 
-	cube_M=setPosition(cube_M,{x:0,y:0,z:-200});
+	cube_M=setPosition(cube_M,{x:0,y:-10000,z:-3000});
 
 	function setScale(m,sc){
 		m[0]=sc.x;
@@ -173,7 +233,7 @@
 		return m;
 	}
 
-	cube_M=setScale(cube_M,{x:1.0,y:0.5,z:1.0});
+	cube_M=setScale(cube_M,{x:700.0,y:700.0,z:700.0});
 
 	console.log(cube_M);
 
@@ -223,7 +283,7 @@
 		0,0,1,-pos.z,
 		0,0,0,1
 		];
-		var N=normalize(sub(pos,lookat));
+		var N=normalize(sub(lookat,pos));
 		var U=normalize(cross(up,N));
 		var V=normalize(cross(N,U));
 		var cameraR=[
@@ -246,7 +306,7 @@
 
 	}
 
-	var cube_V=setViewMatrix({x:0,y:0,z:200},{x:0,y:0,z:-200},{x:0,y:1,z:0})
+	var cube_V=setViewMatrix({x:0,y:-1000,z:0},{x:0,y:-1000,z:-3000},{x:0,y:1,z:0})
 
 
 
@@ -257,12 +317,130 @@
 	
 	console.log(cube);
 
+	function setProjectionMatrix(fieldOfView,aspectRatio,zNearPlane,zFarPlane){
+
+	    var f_n = 1.0 / (zFarPlane - zNearPlane);
+	    var theta = (fieldOfView*Math.PI/180) * 0.5;
+
+	    var divisor = Math.tan(theta);
+	    var factor = 1 / divisor;
+
+	    var m=[
+			0,0,0,0,
+			0,0,0,0,
+			0,0,0,0,
+			0,0,0,0
+			];
+
+	    m[0] = (1.0 / aspectRatio) * factor;
+	    m[5] = factor;
+	    m[10] = (-(zFarPlane + zNearPlane)) * f_n;
+	    m[11] = -1.0;
+	    m[14] = -2.0 * zFarPlane * zNearPlane * f_n;
+	    return m;
+	}
+
+	var cube_P=setProjectionMatrix(30,16/9,10,1000);
+	console.log(cube_P);
 
 
 
+	for(var i=0;i<cube.length;i++){ 
+		cube[i]=MxV(cube_P,cube[i]);
+
+		cube[i].x=cube[i].x/cube[i].w;
+		cube[i].y=cube[i].y/cube[i].w;
+		cube[i].z=cube[i].z/cube[i].w;
+		//cube[i].w=cube[i].w/cube[i].w;
+
+	}
+	
+	console.log(cube);
 
 
 
+/*	for(var i=0;i<cube.length;i++){ 
+		point(500*(cube[i].x+1),250*(cube[i].y+1),'red')
+		//console.log(500*(cube[i].x+1),250*(cube[i].y+1));
+	}*/
+
+
+/*	point5(500*(cube[0].x+1),250*(cube[0].y+1),0,'red')
+	point5(500*(cube[1].x+1),250*(cube[1].y+1),0,'black')
+	point5(500*(cube[2].x+1),250*(cube[2].y+1),0,'blue')
+	point5(500*(cube[3].x+1),250*(cube[3].y+1),0,'yellow')
+	point5(500*(cube[4].x+1),250*(cube[4].y+1),0,'gray')
+	point5(500*(cube[5].x+1),250*(cube[5].y+1),0,'purple')
+	point5(500*(cube[6].x+1),250*(cube[6].y+1),0,'green')
+	point5(500*(cube[7].x+1),250*(cube[7].y+1),0,'pink')
+*/
+
+	var screen_cube=cube;
+
+	for(var i=0;i<cube.length;i++){ 
+		screen_cube[i].x=400*(cube[i].x+1);
+		screen_cube[i].y=225*(cube[i].y+1);
+
+		var depth=cube[i].z;
+    	var z = depth * 2.0 - 1.0; // Back to NDC 
+    	var near_plane=10;
+    	var far_plane=1000;
+     	screen_cube[i].z=(2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
+
+	}
+
+	point5(screen_cube[0].x,screen_cube[0].y,0,'red');
+	point5(screen_cube[1].x,screen_cube[1].y,0,'black');
+	point5(screen_cube[2].x,screen_cube[2].y,0,'blue');
+	point5(screen_cube[3].x,screen_cube[3].y,0,'yellow');
+	point5(screen_cube[4].x,screen_cube[4].y,0,'gray');
+	point5(screen_cube[5].x,screen_cube[5].y,0,'purple');
+	point5(screen_cube[6].x,screen_cube[6].y,0,'green');
+	point5(screen_cube[7].x,screen_cube[7].y,0,'pink');
+/*
+
+	triangle(screen_cube[1],screen_cube[0],screen_cube[2],'gray');
+	triangle(screen_cube[1],screen_cube[4],screen_cube[2],'gray');
+
+	triangle(screen_cube[1],screen_cube[5],screen_cube[7],'red');
+	triangle(screen_cube[1],screen_cube[0],screen_cube[7],'red');
+
+	triangle(screen_cube[2],screen_cube[4],screen_cube[3],'blue');
+	triangle(screen_cube[2],screen_cube[6],screen_cube[3],'blue');
+	
+	triangle(screen_cube[1],screen_cube[5],screen_cube[3],'yellow');
+	triangle(screen_cube[1],screen_cube[4],screen_cube[3],'yellow');
+	
+	triangle(screen_cube[0],screen_cube[2],screen_cube[7],'pink');
+	triangle(screen_cube[2],screen_cube[6],screen_cube[7],'pink');
+
+	triangle(screen_cube[5],screen_cube[6],screen_cube[7],'purple');
+	triangle(screen_cube[5],screen_cube[6],screen_cube[3],'purple');
+
+*/
+
+	var tri=[
+		[5,6,7,'purple'],
+		[5,6,3,'purple'],
+
+		[2,4,3,'red'],
+		[2,6,3,'red'],
+		[1,5,3,'blue'],
+		[1,4,3,'blue'],
+		[0,2,7,'yellow'],
+		[2,6,7,'yellow'],
+		[1,5,7,'green'],
+		[1,0,7,'green'],
+		[1,0,2,'gray'],
+		[1,4,2,'gray'],
+	];
+	for(var i=0;i<tri.length;i++){
+
+		triangle(screen_cube[tri[i][0]],screen_cube[tri[i][1]],screen_cube[tri[i][2]],tri[i][3]);
+		console.log(tri[i][0],screen_cube[tri[i][0]].z);
+		console.log(tri[i][1],screen_cube[tri[i][1]].z);
+		console.log(tri[i][2],screen_cube[tri[i][2]].z);
+	}
 
 
 
